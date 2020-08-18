@@ -1,65 +1,81 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import React, { useContext, useEffect } from 'react';
+import authContext from '../context/auth/authContext';
+import appContext from '../context/app/appContext';
+import Link from 'next/link';
 
-export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+import Layout from '../components/Layout';
+import Dropzone from '../components/Dropzone';
+import Alert from '../components/Alert';
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+const Home = () => {
+    const contextAuth = useContext(authContext);
+    const { authenticateUser } = contextAuth;
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+    const contextApp = useContext(appContext);
+    const { messageFile, url } = contextApp;
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+    useEffect(() => {
+        const token = localStorage.getItem('z_token');
+        if (token) {
+            authenticateUser();
+        }
+    }, []);
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+    return (
+        <Layout>
+            <div className="md:w-4/5 xl:w-3/5 mx-auto mb-32">
+                {url ? (
+                    <>
+                        <p className="text-center text-2xl mt-10">
+                            {' '}
+                            <span className="font-bold text-blue-700 text-3xl">
+                                Your URL is
+                            </span>{' '}
+                            {`${process.env.frontendURL}/links/${url}`}
+                        </p>
+                        <button
+                            type="button"
+                            className="bg-blue-800 w-full p-3 hover:bg-blue-600 rounded text-white font-bold uppercase mt-10"
+                            onClick={() =>
+                                navigator.clipboard.writeText(
+                                    `${process.env.frontendURL}/links/${url}`
+                                )
+                            }
+                        >
+                            Copy link
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        {messageFile && <Alert />}
+                        <div className="lg:flex md:shadow-lg p-5 bg-white rounded-lg py-10">
+                            <Dropzone />
+                            <div className="md:flex-1 mb-3 mx-2 mt-16 lg:mt-0">
+                                <h2 className="text-4xl font-sans font-bold text-gray-800 my-4">
+                                    Share your files simply and with privacy
+                                </h2>
+                                <p className="text-lg leading-loose">
+                                    <span className="text-blue-700 font-bold">
+                                        Zend
+                                    </span>{' '}
+                                    allows you to share files encrypted and it
+                                    is removed after a defined number of
+                                    downloads. So you can keep what you share
+                                    privately and be sure that your stuff isn't
+                                    online forever.
+                                </p>
+                                <Link href="/createaccount">
+                                    <a className="text-blue-700 font-bold text-lg hover:text-blue-500">
+                                        Create an account for more benefits
+                                    </a>
+                                </Link>
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
+        </Layout>
+    );
+};
 
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
-}
+export default Home;
